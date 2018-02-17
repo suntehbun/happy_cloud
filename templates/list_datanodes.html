@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block title %}List Datanodes{% endblock %}
+{% block body %}
+  <h2>List the DataNodes that store replicas of each block of a file in SUFS</h2>
+  {% if error %}<div class="error"><strong>Error:</strong> {{ error }}</div>{% endif %}
+  <form action="" method="post">
+    <dl>
+      <dt>File Path:
+      <dd><input type="text" name="filepath" size="30" value="{{ request.form.filepath }}">
+    </dl>
+    <div class="actions"><input type="submit" value="Submit"></div>
+  </form>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block title %}Create Directory{% endblock %}
+{% block body %}
+  <h2>Create a new Directory in SUFS</h2>
+  {% if error %}<div class="error"><strong>Error:</strong> {{ error }}</div>{% endif %}
+  <form action="" method="post">
+    <dl>
+      <dt>Directory Path:
+      <dd><input type="text" name="filepath" size="30" value="{{ request.form.filepath }}">
+    </dl>
+    <div class="actions"><input type="submit" value="Submit"></div>
+  </form>
+{% endblock %}

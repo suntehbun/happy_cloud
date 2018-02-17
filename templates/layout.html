@@ -1,0 +1,30 @@
+<!doctype html>
+<title>{% block title %}Welcome{% endblock %} | SUFS</title>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+<div class="page">
+  <h1>SUFS</h1>
+  <div class="navigation">
+    <a href="{{ url_for('create_file') }}">Create a new file in SUFS</a> |
+    <a href="{{ url_for('read_file') }}">Read a file</a> |
+    <a href="{{ url_for('delete_file') }}">Delete a file</a> |
+    <a href="{{ url_for('create_directory') }}">Create a directory</a> |
+    <a href="{{ url_for('delete_directory') }}">Delete a directory</a> |
+    <a href="{{ url_for('list_contents') }}">List the contents of a directory</a> |
+    <a href="{{ url_for('list_datanodes') }}">List the DataNodes that store replicas of each block of a file</a> 
+  </div>
+  {% with flashes = get_flashed_messages() %}
+    {% if flashes %}
+      <ul class="flashes">
+      {% for message in flashes %}
+        <li>{{ message }}
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+  <div class="body">
+  {% block body %}{% endblock %}
+  </div>
+  <div class="footer">
+    SUFS &mdash; A SUFS Application
+  </div>
+</div>

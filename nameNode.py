@@ -14,11 +14,12 @@ this does the things
 #metadata structure
 MDS = {}
 
-def CheckIfFileExist( file ):
-    
 
 #Blockname the parts
-def BlockName():
+def BlockName(filesize, filepath):
+    blocksize = 67108864
+    for
+
 
 #checks if the directory exists in our file system
 #wip
@@ -44,15 +45,31 @@ def hello_world():
 	return render_template('layout.html')
 
 
-@app.route('/create_file', methods=['GET', 'POST'])
+@app.route('/create_file', methods=['POST'])
+
+#need to redo this for json interactions
 def create_file():
 	error = None
 	if request.method == 'POST':
-		print("got here")
-		# send file path to the data node
-		print (request.form['filepath'])
-		dataToSend = {'filepath':request.form['filepath']}
-		print('got here 2')
+		print("Client sending a file path")
+		#get the json file
+        Recvjson= request.get_json(force=True)
+        #print to test if recieved json
+        print ('data from client: ' Recvjson)
+        #get the file path from the json here
+		ClientFilePath = Recvjson.filepath
+        if ClientFilePath not in MDS:
+            #put into json response
+            json.response = OK
+            #return blocknames/list of blocks, and data nodes
+
+            dictoReturn = {'message': "OK", }
+            return jsonify(dictoReturn)
+        else:
+            dictoReturn = {'message': "File already Exists"}
+            return jsonify(dictoReturn)
+
+		print('got file path')
 		res = requests.post('http://35.161.253.213:5000/tests/endpoint', json=dataToSend)
 		print ('response from data node:',res.text)
 		dictFromServer = res.json()
@@ -63,11 +80,22 @@ def create_file():
 
 @app.route('/read_file', methods=['GET', 'POST'])
 def read_file():
-	error = None
-	if request.method == 'POST':
-		# send file path to the data node
-		call_function()
-	return render_template('read_file.html', error=error)
+        error = None
+        if request.method == 'POST':
+            filepath = #filepath from JSON
+            #assume '_sequenceNo_' precedes numbered file path piece
+            #for example library/doc/image.jpg_sequenceNo_3 this is the 3rd piece of image.jpg
+        fileNames =[]
+            #each list in list is list of dataNodes holding that data block
+            fileLoc = MDS[filepath]
+            fileBlockSize = len(fileLoc)
+            #populate fileNames list with the names of Blocks stored in dataNodes
+        for i in range(o,n):
+                fileNames.append(filepath+'_sequenceNo_'+i)
+            #need to send fileLoc and fileNames to client
+            nameDic = {'name':fileNames}
+            locationDic = {'location':fileLoc}
+        return render_template('read_file.html', error=error)
 
 @app.route('/delete_file', methods=['GET', 'POST'])
 def delete_file():

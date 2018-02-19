@@ -14,13 +14,37 @@ this does the things
 #metadata structure
 MDS = {}
 
+#structure to hold the datanode and ips?
+datanodes = {}
 
 #Blockname the parts
-def BlockName(filesize, filepath):
-    blocksize = 67108864
-    for
+def BlockDivide(size):
+    num_blocks = 67108864/size
+    return num_blocks
 
-
+def CheckJsonValid(json):
+    error = json.get('error')
+    #establish valid number whatever it is
+    if error == -1:
+        return True
+    else:
+        return False
+#checks if file exists and returns a json
+def CheckFile(Recvjson):
+    #get the file path from the json here
+    ClientFilePath = Recvjson.get('path')
+    if ClientFilePath not in MDS:
+        #put into json response
+        num_of_blocks= BlockDivide()
+        #return blocknames/list of blocks, and data nodes
+        dictoReturn = {'valid': 0, 'message': 'here are some things'}
+        #get list of datanodes here
+        dictoReturn.update({'datenodes': datanodelist})
+        dictoReturn.update({'blocks': num_of_blocks})
+        return jsonify(dictoReturn)
+    else:
+        dictoReturn = {'valid': -1, 'message': 'File already Exists'}
+        return jsonify(dictoReturn)
 #checks if the directory exists in our file system
 #wip
 def CheckDir( dir ):
@@ -29,6 +53,7 @@ def CheckDir( dir ):
     #to store the parts of unique n+1 file path
     contents = set()
     for key in currentKeys:
+        #split the file path and store for easier finding
         key.split("/")
         keylength = len(key)
         for i in range (0, keylength):
@@ -42,40 +67,35 @@ def CheckDir( dir ):
 
 @app.route('/')
 def hello_world():
-	return render_template('layout.html')
+	return 'connected to name node'
 
-
-@app.route('/create_file', methods=['POST'])
+#don't think its possible for a get since client would always give us info
+@app.route('/create_file', methods=['GET', 'POST'])
 
 #need to redo this for json interactions
 def create_file():
-	error = None
-	if request.method == 'POST':
-		print("Client sending a file path")
-		#get the json file
+    error = None
+    #not sure about this yets
+    if request.method == 'POST':
+        print("Client sending a file path")
+	    #get the json file
         Recvjson= request.get_json(force=True)
         #print to test if recieved json
         print ('data from client: ' Recvjson)
-        #get the file path from the json here
-		ClientFilePath = Recvjson.filepath
-        if ClientFilePath not in MDS:
-            #put into json response
-            json.response = OK
-            #return blocknames/list of blocks, and data nodes
-
-            dictoReturn = {'message': "OK", }
-            return jsonify(dictoReturn)
+        #if valid json
+        valid = CheckJsonValid(Recvjson)
+        if valid:
+            #returns a dict of our data
+            dictoReturn=CheckFile(Recvjson)
         else:
-            dictoReturn = {'message': "File already Exists"}
-            return jsonify(dictoReturn)
-
-		print('got file path')
-		res = requests.post('http://35.161.253.213:5000/tests/endpoint', json=dataToSend)
-		print ('response from data node:',res.text)
-		dictFromServer = res.json()
-		return 'SUCCESSFUL HANDSHAKE!'
-	else:
-		return render_template('create_file.html', error=error)
+            print('not valid json code')
+            #replace this with a client ip getter
+            res = requests.post('http://35.161.253.213:5000/tests/endpoint', json=dataToSend)
+            print ('response from data node:',res.text)
+            dictFromServer = res.json()
+            return 'SUCCESSFUL HANDSHAKE!'
+    else:
+        return render_template('create_file.html', error=error)
 
 
 @app.route('/read_file', methods=['GET', 'POST'])

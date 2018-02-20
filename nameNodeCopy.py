@@ -1,7 +1,9 @@
 import requests
 from flask import Flask, request, session, url_for, redirect, \
      render_template, abort, g, flash, _app_ctx_stack, jsonify
-
+#help with merging dicts
+from itertools import chain
+from collections import defaultdict
 
 app = Flask(__name__)
 
@@ -29,10 +31,16 @@ def CheckJsonValid(json):
         return True
     else:
         return False
+
+def CreateInvalidJson():
+    response = {'valid': -1, 'message': 'not valid json'}
+    return response
+
 #checks if file exists and returns a json
 def CheckFile(Recvjson):
     #get the file path from the json here
     ClientFilePath = Recvjson.get('path')
+    #are we getting the file or the path?
     if ClientFilePath not in MDS:
         #put into json response
         num_of_blocks= BlockDivide()
@@ -71,7 +79,6 @@ def hello_world():
 
 #don't think its possible for a get since client would always give us info
 @app.route('/create_file', methods=['GET', 'POST'])
-
 #need to redo this for json interactions
 def create_file():
     error = None
@@ -87,20 +94,21 @@ def create_file():
         if valid:
             #returns a dict of our data
             dictoReturn=CheckFile(Recvjson)
+        #fix logic here
         else:
             print('not valid json code')
             #replace this with a client ip getter
-            res = requests.post('http://35.161.253.213:5000/tests/endpoint', json=dataToSend)
-            print ('response from data node:',res.text)
-            dictFromServer = res.json()
-            return 'SUCCESSFUL HANDSHAKE!'
+            #res = requests.post('http://35.161.253.213:5000/tests/endpoint', json=dataToSend)
+            #print ('response from data node:',res.text)
+            dictFromServer = CreateInvalidJson()
+            return jsonify(dictFromServer)
     else:
-        return render_template('create_file.html', error=error)
+        return 'some other method'
 
 
 @app.route('/read_file', methods=['GET', 'POST'])
 def read_file():
-        error = None
+    error = None
         if request.method == 'POST':
             filepath = #filepath from JSON
             #assume '_sequenceNo_' precedes numbered file path piece
@@ -117,37 +125,37 @@ def read_file():
             locationDic = {'location':fileLoc}
         return render_template('read_file.html', error=error)
 
+#this might be a socket programming thing.
+@app.route('/receive_block_reports')
+def receive_block_reports():
+    #not sure what format these are in but logic is like this
+    if (valid message or whatever):
+        NewMDS=defaultdict(list)
+        blockreport = message.getdict
+        if file in MDS:
+            tempMDS = MDS
+            for k, v in chain(blockreport.items(), tempMDS.items()):
+                NewMDS[k].append(v);
+            MDS=NewMDS
+            return 'successfully added'
+        else:
+            MDS.update(blockreport)
+    else:
+        return 'invalid blockreport'
+
+#will need to discuss about this.
 @app.route('/delete_file', methods=['GET', 'POST'])
 def delete_file():
-	error = None
-	if request.method == 'POST':
-		# send file path to the data node
-		call_function()
-	return render_template('delete_file.html', error=error)
+
 
 @app.route('/create_directory', methods=['GET', 'POST'])
+#replace this with the above function check dir
 def create_directory():
-	error = None
-	if request.method == 'POST':
-		# send file path to the data node
-		call_function()
-	return render_template('create_directory.html', error=error)
 
+#will need to disscuss about this
 @app.route('/delete_directory', methods=['GET', 'POST'])
 def delete_directory():
-	error = None
-	if request.method == 'POST':
-		# send file path to the data node
-		call_function()
-	return render_template('delete_directory.html', error=error)
 
-@app.route('/list_contents', methods=['GET', 'POST'])
-def list_contents():
-	error = None
-	if request.method == 'POST':
-		# send file path to the data node
-		call_function()
-	return render_template('list_contents.html', error=error)
 
 @app.route('/list_datanodes', methods=['GET', 'POST'])
 def list_datanodes():

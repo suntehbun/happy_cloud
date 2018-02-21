@@ -1,4 +1,5 @@
-import requests
+import requests, json
+import math
 from flask import Flask, request, session, url_for, redirect, \
      render_template, abort, g, flash, _app_ctx_stack, jsonify
 
@@ -6,49 +7,56 @@ from flask import Flask, request, session, url_for, redirect, \
 app = Flask(__name__)
 
 
-'''
-1. Create a new file in SUFS
-when the file is created, an S3 object should be specified and the data from S3 should be written into the file
-2. Read a file
-the file will be read from SUFS and a copy of the file is returned
-3. Delete a file
-4. Create a directory
-5. Delete a directory
-6. List the contents of a directory
-7. List the DataNodes that store replicas of each block of a file
-be sure to keep the output from this somewhat neat - it could get long for large files (i.e., many blocks)
-'''
-
 # metadata data structure
 metadata = {}
+
+# global variables
+datanode_addresses = ['172.31.25.233']
+datanode_nums = 1 #chage this to 5 after testing with value 1
+roundrobin_counter = 1
 
 
 @app.route('/')
 def hello_world():
 	return 'connected to the name node'
 
-
-# get
-@app.route('/receive_file', methods=['GET'])
+#get file paht and file size from the client and return the number of blocks and destination
+@app.route('/create_file', methods=['GET'])
 def receive_file():
-	# check if the path is unique
-	input_json = request.get_json(force=True)  
-	print 'data from client:', input_json
-	path = input_json.get('path')
-	size = input_json.get('size')
-    if path in metadata:
-    	dataToReturn = {'valid': -1}
-    	return jsonify(dataToReturn)
-    else:
-    	metadata[path] = [] # store in the metadata
-    	num_blocks = size / 67108864
-    	# contact ec2 and see they are avaiable 
-    	# pick avaiable block addresses
-    	dataToReturn = {'num_blocks': num_blocks, 'addresses': [, , ,]}
-    	return jsonify(dataToReturn)
+	input_json = request.get_json(force=True)
+	print ('data from the client: ', input_json)
+	file_path = input_json.get('filePath')
+	file_size = input_json.get('fileSize')
 
-# get block report from data nodes
-
+	if file_path in metadata:
+		dataToReturn = {'valid': -1} # assume -1 indicates failure
+	else:
+		metadata[file_path] = []
+		num_blocks = math.ceil(file_size / 67108864)
+		if file_size % 67108864 > 0:
+			num_blocks += 1
+		blocks = 0
+		ec2_addresses = []
+		print('num_blocks: ', num_blocks)
+		# pick ec2 instances who are available -> round robin approach
+		global roundrobin_counter
+		global datanode_addresses
+		while blocks != num_blocks:
+			ec2_address_index = roundrobin_counter % datanode_nums
+			print('ec2 address index: ', ec2_address_index)
+			ec2_address_heartbeat = 'http://' + datanode_addresses[ec2_address_index] + ':5000/heartbeat'
+			print('ec2_address_heartbeat: ', ec2_address_heartbeat)
+			res = requests.get(ec2_address_heartbeat)
+			if res.status_code == requests.codes.ok:
+				ec2_addresses.append(datanode_addresses[ec2_address_index])
+			roundrobin_counter += 1
+			blocks += 1
+			print('blocks: ', blocks)
+			print('num_blocks: ', num_blocks)
+		print('while loop broken')
+		dataToReturn = {'valid': 0, 'addresses': ec2_addresses}
+	return jsonify(dataToReturn)
+			
 
 
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'

@@ -11,9 +11,10 @@ app = Flask(__name__)
 metadata = {}
 
 # global variables
-datanode_addresses = ['172.31.25.233']
-datanode_nums = 1 #chage this to 5 after testing with value 1
+datanode_addresses = ['172.31.25.233', '172.31.29.132']
+datanode_nums = 2 #chage this to 5 after testing with value 1
 roundrobin_counter = 1
+BLOCK_SIZE = 5000
 
 
 @app.route('/')
@@ -32,8 +33,8 @@ def receive_file():
 		dataToReturn = {'valid': -1} # assume -1 indicates failure
 	else:
 		metadata[file_path] = []
-		num_blocks = math.ceil(file_size / 67108864)
-		if file_size % 67108864 > 0:
+		num_blocks = math.ceil(file_size / BLOCK_SIZE)
+		if file_size % BLOCK_SIZE > 0:
 			num_blocks += 1
 		blocks = 0
 		ec2_addresses = []
@@ -56,7 +57,14 @@ def receive_file():
 		print('while loop broken')
 		dataToReturn = {'valid': 0, 'addresses': ec2_addresses}
 	return jsonify(dataToReturn)
-			
+
+
+@app.route('/receive_report', methods=['POST'])
+def receive_report():
+	input_json = request.get_json(force=True)
+	print ('data from the client: ', input_json)
+	return 'ok'
+
 
 
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'

@@ -27,6 +27,8 @@ with open(S3Path, 'wb') as data:
 
 #global variables
 NAMENODE_ADDRESS = '54.218.46.77:5000'
+AWS_KEY_LOCATION = '/home/ec2-user/SUFS/venv/key/HaileysKey.pem'
+DATANODE_STATIC_FILE_LOCATION = '/home/ec2-user/SUFS/venv/datanode/contents'
 
 # function that extracts key and name from S3 file path
 def extractS3Info(S3Link):
@@ -74,18 +76,26 @@ def extractS3Info(S3Link):
 	S3Info = {'S3Key' : S3Key, 'S3Bucket': S3Bucket}
 	return S3Info
 
-def splitFileInBlocks(newFilePath, key):
+#this function extracts only file name from S3 key
 
+def extractFileName(filePath):
+	if len(filePath) == 0:
+		return 'text' # default file name if file name is not provided
+	else:
+		filePaths = filePath.split('/')
+		fileName = filePaths[len(filePaths) - 1]
+		return fileName
+
+def splitFileInBlocks(newFilePath, fileName):
 	fid = 1
 	with open(newFilePath) as infile:
 		def readOneBlock():
-			return infile.read(67108864) #test with different value
+			return infile.read(5000) #test with different value 67108864
 		for block in iter(readOneBlock, ''):
 			print ('in one iteration in splitFileInBlock')
-			newFileName = key + '_' +str(fid) + '.txt'
+			newFileName = fileName + '_' +str(fid)
 			print('newFileName: ', newFileName)
-			f = open('file%d.txt' %fid, 'w')
-			#f = open(newFileName, 'w')
+			f = open(newFileName, 'w')
 			f.write(block)
 			f.close()
 			fid += 1
@@ -108,10 +118,9 @@ def create_file():
 		print (request.form['filepath'])
 		print(request.form['S3filepath'])
 
-		filepath = request.form['filepath']
+		filePath = request.form['filepath']
 		S3Path = request.form['S3filepath']
-		# fileSize = os.stat().st_size Need to Know the File Size!!!
-		# so should I download the S3 File first??
+		fileName = extractFileName(filePath)
 		S3Info = extractS3Info(S3Path)
 
 		BUCKET_NAME = S3Info['S3Bucket'] # replace with your bucket name
@@ -125,7 +134,8 @@ def create_file():
 		for bucket in s3.buckets.all():
 			print(bucket.name)
 
-		newFilePath = '/home/ec2-user/SUFS/venv/S3Download/downloaded' # + KEY
+		#keep downloaded file in client using different file name for each download?
+		newFilePath = '/home/ec2-user/SUFS/venv/S3Download/downloadedFile' # + KEY
 		#newFilePath = '/home/ec2-user/SUFS/venv/S3Download/' + KEY
 		print('newFilePath: ', newFilePath)
 
@@ -138,7 +148,7 @@ def create_file():
 				return render_template('create_file.html', data={'valid': -1, 'status': 'S3 Bucket Doesnt exist'})
 
 		S3FileSize = os.stat(newFilePath).st_size
-		print('downloaded file sizeL: ',  S3FileSize)
+		print('downloaded file size: ',  S3FileSize)
 
 		
 		#2. contact to data node and check if filepath exists, gets num blocks if it doesn't exist
@@ -156,37 +166,29 @@ def create_file():
 
 		# check if the file already exists or not
 		isFileExists = namenodeData['valid']
+		print('isFileExists: ', isFileExists)
 		
-		isFileExists = 1 # delete this later: testing purpose
 		if isFileExists == -1:
+			print('in isFileExists')
 			return render_template('create_file.html', data={'valid': -1, 'status': 'File Already Exists'})
 		else:
 			#3. Split the file into blocks
-			splitFileInBlocks(newFilePath, KEY)
-		
-
-		#3. Split the file into blocks
-		#splitFileInBlocks(newFilePath)
+			splitFileInBlocks(newFilePath, fileName)
 
 		#4. Store the block in Data nodes (contact ec2 with blocks)
-		
 		blockNums = len(namenodeData['addresses'])
+
 		fid = 1
 		print('block nums: ', blockNums)
 		#cmd = 'scp -i aKey.pem aFile.txt ec2-user@serverIp:folder'
 		#cmd = 'scp -i /home/ec2-user/SUFS/venv/key/HaileysKey.pem aFile.txt ec2-user@serverIp:folder'
-		'''
-		fileTransferCommand = 'scp -i /home/ec2-user/SUFS/venv/key/HaileysKey.pem file' + str(fid) + '.txt ec2-user@172.31.25.233:/home/ec2-user/SUFS/venv/datanode'
-		print('fileTransferCommand: ', fileTransferCommand)
-		call(fileTransferCommand.split())
-		'''
-		
 		for address in namenodeData['addresses']:
-			#fileName = 'file%d.txt'
-			fileName = KEY + str(fid)
-			print('file name before sending it to the data node: ', fileName)
-			fileTransferCommand = 'scp -i /home/ec2-user/SUFS/venv/key/HaileysKey.pem ' + fileName +' ec2-user@' + address + ':/home/ec2-user/SUFS/venv/datanode'
+			fileToSend = fileName + '_' + str(fid)
+			print('file name before sending it to the data node: ', fileToSend)
+			fileTransferCommand = 'scp -i ' + AWS_KEY_LOCATION + ' ' + fileToSend +' ec2-user@' + address + ':' + DATANODE_STATIC_FILE_LOCATION
 			print('fileTransferCommand: ', fileTransferCommand)
+			fileToSend = ''
+			fid += 1
 			try:
 				call(fileTransferCommand.split())
 			except requests.exceptions.RequestException as e:
@@ -210,8 +212,10 @@ def delete_file():
 	error = None
 	if request.method == 'POST':
 		# send file path to the data node
+		print (request.form['filepath'])
 		call_function()
-	return render_template('delete_file.html', error=error)
+	else:
+		return render_template('delete_file.html', error=error)
 
 @app.route('/create_directory', methods=['GET', 'POST'])
 def create_directory():

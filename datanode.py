@@ -13,14 +13,14 @@ ec2 = boto3.resource('ec2')
 instance = ec2.Instance('id')
 
 #global variables
-NAMENODE_ADDRESS = '172.31.21.108:5000'
-NAMENODE_REPORT = 'http://54.218.46.77:5000/receive_report'
-CONTENTS_PATH = '/home/ec2-user/SUFS/venv/datanode/contents'
-CLIENT_STATIC_FILE_LOCATION = '/home/ec2-user/SUFS/venv/filesFromDatanodes'
-AWS_KEY_LOCATION = '/home/ec2-user/SUFS/venv/key/HaileysKey.pem'
-DATANODE_ADDRESSES = ['172.31.25.233', '172.31.21.207', '172.31.16.153', '172.31.28.236']
-DATANODE_STATIC_FILE_LOCATION = '/home/ec2-user/SUFS/venv/datanode/contents'
-AWS_KEY_LOCATION = '/home/ec2-user/SUFS/venv/key/HaileysKey.pem'
+NAMENODE_ADDRESS = '5000'
+NAMENODE_REPORT = 'receive_report'
+CONTENTS_PATH = ''
+CLIENT_STATIC_FILE_LOCATION = ''
+AWS_KEY_LOCATION = ''
+DATANODE_ADDRESSES = ['']
+DATANODE_STATIC_FILE_LOCATION = ''
+AWS_KEY_LOCATION = ''
 DELETED_BLOCKS = set()
 REPLICA_NUM = 2
 

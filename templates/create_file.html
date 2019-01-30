@@ -7,7 +7,12 @@
     <dl>
       <dt>File Path:
       <dd><input type="text" name="filepath" size="30" value="{{ request.form.filepath }}">
+      <dt>S3 File Path:
+      <dd><input type="text" name="S3filepath" size="30" value="{{ request.form.S3filepath }}">
     </dl>
     <div class="actions"><input type="submit" value="Submit"></div>
   </form>
+  {% if data %}
+  	<p><b>{{ data.status }}</b></p>
+  {% endif %}
 {% endblock %}

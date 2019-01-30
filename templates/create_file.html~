@@ -1,16 +1,13 @@
 {% extends "layout.html" %}
-{% block title %}Delete File{% endblock %}
+{% block title %}Sign In{% endblock %}
 {% block body %}
-  <h2>Delete a file in SUFS</h2>
+  <h2>Create a new file in SUFS</h2>
   {% if error %}<div class="error"><strong>Error:</strong> {{ error }}</div>{% endif %}
   <form action="" method="post">
     <dl>
       <dt>File Path:
-      <dd><input type="text" name="filepath" size="30" value="{{ request.form.filepath }}">
+      <dd><input type="text" name="username" size="30" value="{{ request.form.filepath }}">
     </dl>
     <div class="actions"><input type="submit" value="Submit"></div>
   </form>
-  {% if data %}
-  	<p><b>{{ data.status }}</b></p>
-  {% endif %}
 {% endblock %}

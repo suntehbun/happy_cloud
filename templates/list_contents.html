@@ -1,8 +1,7 @@
 {% extends "layout.html" %}
 {% block title %}List Contents{% endblock %}
 {% block body %}
-  <h2>List the contents of a directory in SUFS</h2>
-  {% if error %}<div class="error"><strong>Error:</strong> {{ error }}</div>{% endif %}
+  <h2>List the contents of a directory in SUFS (Please include / at the end of the directory name)</h2>
   <form action="" method="post">
     <dl>
       <dt>Directory Path:
@@ -10,4 +9,12 @@
     </dl>
     <div class="actions"><input type="submit" value="Submit"></div>
   </form>
+  {% if data.status %}
+    {{data.status}}
+  {% endif %}
+  {% if data.contents %}
+  	{% for content in data.contents %}
+  		<h1><div>{{ content }}</div></h1>
+  	{% endfor %}
+  {% endif %}
 {% endblock %}

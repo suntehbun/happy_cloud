@@ -10,4 +10,7 @@
     </dl>
     <div class="actions"><input type="submit" value="Submit"></div>
   </form>
+  {% if data %}
+  	<p><b>{{ data.status }}</b></p>
+  {% endif %}
 {% endblock %}

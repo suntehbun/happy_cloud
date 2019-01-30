@@ -8,10 +8,10 @@ app = Flask(__name__)
 
 
 #global variables
-NAMENODE_ADDRESS = '54.218.46.77:5000'
-AWS_KEY_LOCATION = '/home/ec2-user/SUFS/venv/key/HaileysKey.pem'
-DATANODE_STATIC_FILE_LOCATION = '/home/ec2-user/SUFS/venv/datanode/contents'
-FROM_DATANODE_FILES_LOCATION = '/home/ec2-user/SUFS/venv/filesFromDatanodes'
+NAMENODE_ADDRESS = ''
+AWS_KEY_LOCATION = ''
+DATANODE_STATIC_FILE_LOCATION = ''
+FROM_DATANODE_FILES_LOCATION = ''
 BLOCK_SIZE = 32000000
 TRIGGERED = False
 

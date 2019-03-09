@@ -234,5 +234,5 @@ def replica_check():
 	return 'ok'
 
 
-app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
+app.secret_key = ''
 

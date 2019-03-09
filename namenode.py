@@ -10,8 +10,8 @@ metadata = {}
 
 # global variables
 # private ip
-datanode_addresses = ['172.31.25.233', '172.31.21.207', '172.31.16.153', '172.31.28.236']
-datanode_ip_map = {'54.190.45.17': '172.31.25.233', '34.209.71.107': '172.31.21.207', '52.34.56.4': '172.31.16.153', '54.201.149.85': '172.31.28.236'}
+datanode_addresses = ['', '', '', '']
+datanode_ip_map = {'a': '1', 'b': '2', 'c': '3', 'd': '4'}
 datanode_nums = 4 
 roundrobin_counter = 4
 BLOCK_SIZE = 32000000
